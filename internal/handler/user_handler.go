@@ -12,6 +12,16 @@ type UserHandler struct {
 	userUc *usecase.UserUseCase
 }
 
+type createUserRequest struct {
+	Email string `json:"email" binding:"required,email"`
+	Name  string `json:"name" binding:"required"`
+}
+
+type updateUserRequest struct {
+	Email string `json:"email" binding:"omitempty,email"`
+	Name  string `json:"name"`
+}
+
 func NewUserHandler(uc *usecase.UserUseCase) *UserHandler {
 	return &UserHandler{userUc: uc}
 }
@@ -24,6 +34,7 @@ func NewUserHandler(uc *usecase.UserUseCase) *UserHandler {
 // @Produce json
 // @Param id path string true "User ID (UUID)"
 // @Success 200 {object} map[string]interface{} "User retrieved successfully"
+// @Failure 400 {object} map[string]string "Invalid user ID"
 // @Failure 404 {object} map[string]string "User not found"
 // @Router /users/{id} [get]
 func (h *UserHandler) GetUser(c *gin.Context) {
@@ -31,6 +42,10 @@ func (h *UserHandler) GetUser(c *gin.Context) {
 
 	user, err := h.userUc.GetUser(c.Request.Context(), id)
 	if err != nil {
+		if err == domain.ErrInvalidID {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
 	}
@@ -38,14 +53,39 @@ func (h *UserHandler) GetUser(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": user})
 }
 
+// CreateUser godoc
+// @Summary Create a new user
+// @Description Create a new user with email and name
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param request body createUserRequest true "Create user payload"
+// @Success 201 {object} map[string]interface{} "User created successfully"
+// @Failure 400 {object} map[string]string "Invalid request body"
+// @Failure 409 {object} map[string]string "Email already exists"
+// @Failure 500 {object} map[string]string "Internal server error"
+// @Router /users [post]
 func (h *UserHandler) CreateUser(c *gin.Context) {
-	var user domain.User
-	if err := c.ShouldBindJSON(&user); err != nil {
+	var req createUserRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
+	user := domain.User{
+		Email: req.Email,
+		Name:  req.Name,
+	}
+
 	if err := h.userUc.CreateUser(c.Request.Context(), &user); err != nil {
+		if err == domain.ErrConflict {
+			c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
+			return
+		}
+		if err == domain.ErrBadRequest {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -53,4 +93,83 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"data": user})
 }
 
-// implement another methods
+// UpdateUser godoc
+// @Summary Update a user
+// @Description Update a user by ID with email and/or name
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param id path string true "User ID (UUID)"
+// @Param request body updateUserRequest true "Update user payload"
+// @Success 200 {object} map[string]string "User updated successfully"
+// @Failure 400 {object} map[string]string "Invalid user ID or request body"
+// @Failure 404 {object} map[string]string "User not found"
+// @Failure 409 {object} map[string]string "Email already exists"
+// @Failure 500 {object} map[string]string "Internal server error"
+// @Router /users/{id} [put]
+func (h *UserHandler) UpdateUser(c *gin.Context) {
+	id := c.Param("id")
+
+	var req updateUserRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	user := domain.User{
+		Email: req.Email,
+		Name:  req.Name,
+	}
+
+	if err := h.userUc.UpdateUser(c.Request.Context(), id, &user); err != nil {
+		if err == domain.ErrInvalidID || err == domain.ErrBadRequest {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		if err == domain.ErrNotFound {
+			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			return
+		}
+		if err == domain.ErrConflict {
+			c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "user updated successfully"})
+}
+
+// DeleteUser godoc
+// @Summary Delete a user
+// @Description Delete a user by ID
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param id path string true "User ID (UUID)"
+// @Success 200 {object} map[string]string "User deleted successfully"
+// @Failure 400 {object} map[string]string "Invalid user ID"
+// @Failure 404 {object} map[string]string "User not found"
+// @Failure 500 {object} map[string]string "Internal server error"
+// @Router /users/{id} [delete]
+func (h *UserHandler) DeleteUser(c *gin.Context) {
+	id := c.Param("id")
+
+	if err := h.userUc.DeleteUser(c.Request.Context(), id); err != nil {
+		if err == domain.ErrInvalidID {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		if err == domain.ErrNotFound {
+			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "user deleted successfully"})
+}

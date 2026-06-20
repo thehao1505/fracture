@@ -36,7 +36,7 @@ func Load() *Config {
 	return &Config{
 		App: AppConfig{
 			Port: viper.GetString("APP_PORT"),
-			Env:  viper.GetString("APP_ENV"), 
+			Env:  viper.GetString("APP_ENV"),
 		},
 		DB: DBConfig{
 			Host:			viper.GetString("DB_HOST"),	

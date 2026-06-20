@@ -11,33 +11,18 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/lukenguyen/fracture/config"
-	_ "github.com/lukenguyen/fracture/docs"
 	"github.com/lukenguyen/fracture/internal/handler"
 	infradb "github.com/lukenguyen/fracture/internal/infrastructure/db"
 	"github.com/lukenguyen/fracture/internal/infrastructure/persistence"
 	"github.com/lukenguyen/fracture/internal/usecase"
-	swaggerFiles "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
-// @title Fracture API
-// @version 1.0
-// @description A clean architecture Go API for managing users
-// @termsOfService http://swagger.io/terms/
-//
-// @contact.name API Support
-// @contact.url http://www.swagger.io/support
-// @contact.email support@swagger.io
-//
-// @license.name Apache 2.0
-// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
-//
-// @host localhost:8080
-// @basePath /api/v1
-// @schemes http https
+func healthHandler(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{"status": "ok"})
+}
 
 func main() {
-  cfg := config.Load()
+	cfg := config.Load()
 
 	pool := infradb.NewPostgresPool(cfg)
 	defer pool.Close()
@@ -52,12 +37,7 @@ func main() {
 
 	r := gin.Default()
 
-	r.GET("/health", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{"status": "ok"})
-	})
-
-	// Swagger routes
-	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	r.GET("/health", healthHandler)
 
 	v1 := r.Group("/api/v1")
 	{
@@ -65,8 +45,8 @@ func main() {
 		{
 			users.GET("/:id", userH.GetUser)
 			users.POST("", userH.CreateUser)
-			// users.PUT("/:id", userH.UpdateUser)
-			// users.DELETE("/:id", userH.DeleteUser)
+			users.PUT("/:id", userH.UpdateUser)
+			users.DELETE("/:id", userH.DeleteUser)
 		}
 	}
 
