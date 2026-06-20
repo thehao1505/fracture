@@ -1,0 +1,27 @@
+# Environment files
+.env
+.env.*
+*.env
+!.env.example
+
+# Build artifacts
+bin/
+dist/
+build/
+tmp/
+
+# Go test / coverage artifacts
+*.test
+*.out
+coverage.out
+coverage.html
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+
+# IDE / editor metadata
+.idea/
+.vscode/
