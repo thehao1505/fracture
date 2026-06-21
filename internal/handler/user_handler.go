@@ -36,6 +36,7 @@ func NewUserHandler(uc *usecase.UserUseCase) *UserHandler {
 // @Success 200 {object} map[string]interface{} "User retrieved successfully"
 // @Failure 400 {object} map[string]string "Invalid user ID"
 // @Failure 404 {object} map[string]string "User not found"
+// @Security BearerAuth
 // @Router /users/{id} [get]
 func (h *UserHandler) GetUser(c *gin.Context) {
 	id := c.Param("id")
@@ -64,6 +65,7 @@ func (h *UserHandler) GetUser(c *gin.Context) {
 // @Failure 400 {object} map[string]string "Invalid request body"
 // @Failure 409 {object} map[string]string "Email already exists"
 // @Failure 500 {object} map[string]string "Internal server error"
+// @Security BearerAuth
 // @Router /users [post]
 func (h *UserHandler) CreateUser(c *gin.Context) {
 	var req createUserRequest
@@ -106,6 +108,7 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 // @Failure 404 {object} map[string]string "User not found"
 // @Failure 409 {object} map[string]string "Email already exists"
 // @Failure 500 {object} map[string]string "Internal server error"
+// @Security BearerAuth
 // @Router /users/{id} [put]
 func (h *UserHandler) UpdateUser(c *gin.Context) {
 	id := c.Param("id")
@@ -153,6 +156,7 @@ func (h *UserHandler) UpdateUser(c *gin.Context) {
 // @Failure 400 {object} map[string]string "Invalid user ID"
 // @Failure 404 {object} map[string]string "User not found"
 // @Failure 500 {object} map[string]string "Internal server error"
+// @Security BearerAuth
 // @Router /users/{id} [delete]
 func (h *UserHandler) DeleteUser(c *gin.Context) {
 	id := c.Param("id")

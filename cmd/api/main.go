@@ -13,9 +13,11 @@ import (
 	"github.com/lukenguyen/fracture/config"
 	_ "github.com/lukenguyen/fracture/docs"
 	"github.com/lukenguyen/fracture/internal/handler"
+	"github.com/lukenguyen/fracture/internal/handler/middleware"
 	infradb "github.com/lukenguyen/fracture/internal/infrastructure/db"
 	"github.com/lukenguyen/fracture/internal/infrastructure/persistence"
 	"github.com/lukenguyen/fracture/internal/usecase"
+	"github.com/lukenguyen/fracture/pkg/token"
 )
 
 func healthHandler(c *gin.Context) {
@@ -37,15 +39,25 @@ func healthHandler(c *gin.Context) {
 // @host            localhost:8080
 // @BasePath        /api/v1
 // @schemes         http https
+//
+// @securityDefinitions.apikey  BearerAuth
+// @in                          header
+// @name                        Authorization
+// @description                 Type "Bearer" followed by a space and your JWT access token. Example: "Bearer eyJhbGci..."
 func main() {
 	cfg := config.Load()
 
 	pool := infradb.NewPostgresPool(cfg)
 	defer pool.Close()
 
+	tokenManager := token.NewManager(cfg.JWT.Secret, cfg.JWT.Expiry)
+
 	userRepo := persistence.NewPostgresUserRepo(pool)
 	userUC := usecase.NewUserUseCase(userRepo)
 	userH := handler.NewUserHandler(userUC)
+
+	authUC := usecase.NewAuthUseCase(userRepo, tokenManager)
+	authH := handler.NewAuthHandler(authUC)
 
 	if cfg.App.Env == "production" {
 		gin.SetMode(gin.ReleaseMode)
@@ -59,7 +71,14 @@ func main() {
 
 	v1 := r.Group("/api/v1")
 	{
+		auth := v1.Group("/auth")
+		{
+			auth.POST("/register", authH.Register)
+			auth.POST("/login", authH.Login)
+		}
+
 		users := v1.Group("/users")
+		users.Use(middleware.AuthRequired(tokenManager))
 		{
 			users.GET("/:id", userH.GetUser)
 			users.POST("", userH.CreateUser)
