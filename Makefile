@@ -9,10 +9,13 @@ deps:
 	go mod download
 	go mod tidy
 
-run:
+docs:
+	$(shell go env GOPATH)/bin/swag init -g cmd/api/main.go -o docs
+
+run: docs
 	go run ./cmd/api
 
-build:
+build: docs
 	go build -o bin/api ./cmd/api
 
 clean:
@@ -54,4 +57,4 @@ migrate-force:
 	@if [ -z "$(version)" ]; then echo "usage: make migrate-force version=<n>"; exit 1; fi
 	migrate -path $(MIGRATIONS_DIR) -database "$(DB_URL)" force $(version)
 
-.PHONY: deps run build clean sqlc sqlc-install migrate-install migrate-create migrate-up migrate-down migrate-version migrate-force
+.PHONY: deps docs run build clean sqlc sqlc-install migrate-install migrate-create migrate-up migrate-down migrate-version migrate-force
