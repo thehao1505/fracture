@@ -1,0 +1,232 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UI Table Component</title>
+    <style>
+        /* Basic setup and font styles */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f8f9fa;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        /* Main container for the table component */
+        .table-container {
+            width: 100%;
+            max-width: 1200px;
+            background-color: #ffffff;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            overflow: hidden; /* Ensures content respects the border-radius */
+        }
+
+        /* Table styles */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            color: #495057;
+        }
+
+        /* Table header and cell styles */
+        th, td {
+            padding: 16px 20px;
+            text-align: left;
+            vertical-align: middle;
+            border-bottom: 1px solid #e9ecef;
+            font-size: 14px;
+        }
+
+        /* Table header specific styles */
+        thead th {
+            color: #212529;
+            font-weight: 600;
+            background-color: #f8f9fa;
+            white-space: nowrap;
+        }
+
+        /* Table body row styles */
+        tbody tr {
+            transition: background-color 0.2s ease-in-out;
+        }
+
+        /* Hover state for table body rows */
+        tbody tr:hover {
+            background-color: #f1f3f5;
+            cursor: pointer;
+        }
+
+        /* Remove bottom border from the last row */
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Link style for "Run" */
+        .run-link {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .run-link:hover {
+            text-decoration: underline;
+        }
+
+        /* More options button */
+        .more-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px;
+            font-size: 18px;
+            color: #6c757d;
+            line-height: 1;
+        }
+
+        /* Pagination container */
+        .pagination-container {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            padding: 12px 20px;
+            background-color: #ffffff;
+        }
+
+        /* Pagination button styles */
+        .pagination-button {
+            background-color: transparent;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 6px 10px;
+            margin: 0 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s ease;
+        }
+
+        .pagination-button:hover:not(:disabled) {
+            background-color: #e9ecef;
+        }
+
+        .pagination-button:disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        .pagination-button.active {
+            background-color: #007bff;
+            color: #ffffff;
+            border-color: #007bff;
+        }
+
+        .pagination-button svg {
+            width: 16px;
+            height: 16px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Provider Model Name</th>
+                    <th>Type</th>
+                    <th>Request Adaptor</th>
+                    <th>Tag</th>
+                    <th>Description</th>
+                    <th>Test Connection</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>BAAI/bge-reranker-v2-m3</td>
+                    <td>BAAI/bge-reranker-v2-m3</td>
+                    <td>RERANKING</td>
+                    <td>VLLM_SCORE</td>
+                    <td>DEFAULT</td>
+                    <td>self-host model</td>
+                    <td><a href="#" class="run-link">Run</a></td>
+                    <td><button class="more-button">&hellip;</button></td>
+                </tr>
+                <tr>
+                    <td>bigcode/starcoder2-3b</td>
+                    <td>bigcode/starcoder2-3b</td>
+                    <td>FIM</td>
+                    <td>OPENAI</td>
+                    <td>DEFAULT</td>
+                    <td>self host model</td>
+                    <td><a href="#" class="run-link">Run</a></td>
+                    <td><button class="more-button">&hellip;</button></td>
+                </tr>
+                <tr>
+                    <td>microsoft/codebert-base</td>
+                    <td>microsoft/codebert-base</td>
+                    <td>EMBEDDING</td>
+                    <td>OPENAI</td>
+                    <td>DEFAULT</td>
+                    <td>self-host openrouter api</td>
+                    <td><a href="#" class="run-link">Run</a></td>
+                    <td><button class="more-button">&hellip;</button></td>
+                </tr>
+                <tr>
+                    <td>microsoft/Phi-3-mini-4k-instruct</td>
+                    <td>microsoft/Phi-3-mini-4k-instruct</td>
+                    <td>CHAT</td>
+                    <td>OPENAI</td>
+                    <td>DEFAULT</td>
+                    <td>self host model</td>
+                    <td><a href="#" class="run-link">Run</a></td>
+                    <td><button class="more-button">&hellip;</button></td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="pagination-container">
+            <button class="pagination-button" id="prev-btn" disabled>
+                <svg fill="currentColor" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/>
+                </svg>
+            </button>
+            <button class="pagination-button active">1</button>
+            <button class="pagination-button" id="next-btn">
+                <svg fill="currentColor" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // This script is for demonstrating interactive states.
+        // In a real application, these buttons would handle pagination logic.
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+
+        // Example: Log to console on click to show interactivity
+        prevBtn.addEventListener('click', () => {
+            if (!prevBtn.disabled) {
+                console.log('Previous page clicked');
+            }
+        });
+
+        nextBtn.addEventListener('click', () => {
+            if (!nextBtn.disabled) {
+                console.log('Next page clicked');
+            }
+        });
+    </script>
+
+</body>
+</html>

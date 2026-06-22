@@ -1,0 +1,23 @@
+{
+  "read_write": {
+    "tools": [
+      "read_text_file",
+      "read_multiple_files",
+      "list_directory",
+      "search_files",
+      "edit",
+    ],
+    "description": "Write is built-in tool while read is from file system MCP",
+    "icon": "tag",
+  },
+  "pr": {
+    "tools": ["runCommands", "gh-pull_requests"],
+    "description": "PR operations",
+    "icon": "tag",
+  },
+  "command": {
+    "tools": ["runCommands"],
+    "description": "Terminal operations",
+    "icon": "tag",
+  },
+}

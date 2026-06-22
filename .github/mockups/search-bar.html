@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Bar Component</title>
+    <style>
+        :root {
+            --background-color: #F8F9FA;
+            --input-bg: #FFFFFF;
+            --border-color-default: #CED4DA;
+            --border-color-focus: #80BDFF;
+            --placeholder-color: #6C757D;
+            --icon-color: #495057;
+            --text-color: #212529;
+            --focus-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            background-color: var(--background-color);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            padding-top: 40px;
+        }
+
+        .search-container {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            max-width: 600px;
+            background-color: var(--input-bg);
+            border: 1px solid var(--border-color-default);
+            border-radius: 6px;
+            padding: 0 12px;
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+
+        .search-container:focus-within {
+            border-color: var(--border-color-focus);
+            box-shadow: var(--focus-shadow);
+        }
+
+        .search-icon {
+            flex-shrink: 0;
+            margin-right: 10px;
+            /* A simple SVG to replicate the icon color and shape */
+            content: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="%23495057" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>');
+        }
+
+        .search-input {
+            width: 100%;
+            height: 46px;
+            border: none;
+            outline: none;
+            background-color: transparent;
+            font-size: 16px;
+            color: var(--text-color);
+        }
+
+        .search-input::placeholder {
+            color: var(--placeholder-color);
+            opacity: 1;
+        }
+
+        .search-input::-webkit-search-decoration,
+        .search-input::-webkit-search-cancel-button,
+        .search-input::-webkit-search-results-button,
+        .search-input::-webkit-search-results-decoration {
+            -webkit-appearance: none;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="search-container">
+        <div class="search-icon" role="img" aria-label="Search icon"></div>
+        <input type="search" class="search-input" placeholder="Search by name, provider model name, type, adaptor, endpoint, and des...">
+    </div>
+
+</body>
+</html>
