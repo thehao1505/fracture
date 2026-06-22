@@ -21,3 +21,20 @@ WHERE id = $4;
 DELETE FROM users
 WHERE id = $1;
 
+-- name: ListUsers :many
+SELECT id, email, password, name, created_at, updated_at
+FROM users
+WHERE
+    @keyword::text = ''
+    OR name  ILIKE '%' || @keyword || '%'
+    OR email ILIKE '%' || @keyword || '%'
+ORDER BY created_at DESC
+LIMIT @page_limit OFFSET @page_offset;
+
+-- name: CountUsers :one
+SELECT COUNT(*)
+FROM users
+WHERE
+    @keyword::text = ''
+    OR name  ILIKE '%' || @keyword || '%'
+    OR email ILIKE '%' || @keyword || '%';

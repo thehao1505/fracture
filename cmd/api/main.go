@@ -84,6 +84,7 @@ func main() {
 			users.POST("", userH.CreateUser)
 			users.PUT("/:id", userH.UpdateUser)
 			users.DELETE("/:id", userH.DeleteUser)
+			users.GET("", userH.ListUsers)
 		}
 	}
 

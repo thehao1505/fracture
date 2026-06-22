@@ -95,3 +95,36 @@ func (uc *UserUseCase) DeleteUser(ctx context.Context, id string) error {
 
 	return uc.userRepo.Delete(ctx, uid)
 }
+
+type ListUsersParams struct {
+	Page    int    // bắt đầu từ 1
+	Limit   int    // số item mỗi trang
+	Keyword string
+}
+
+func (uc *UserUseCase) ListUsers(ctx context.Context, p ListUsersParams) ([]*domain.User, int64, error) {
+	// Chuẩn hóa & chặn giá trị bất thường
+	if p.Page < 1 {
+		p.Page = 1
+	}
+	if p.Limit < 1 {
+		p.Limit = 20 // default
+	}
+	if p.Limit > 100 {
+		p.Limit = 100 // cap, tránh client xin 1 triệu record
+	}
+
+	offset := (p.Page - 1) * p.Limit
+
+	users, err := uc.userRepo.List(ctx, p.Keyword, int32(p.Limit), int32(offset))
+	if err != nil {
+		return nil, 0, err
+	}
+
+	total, err := uc.userRepo.Count(ctx, p.Keyword)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return users, total, nil
+}

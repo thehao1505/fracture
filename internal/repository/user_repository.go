@@ -13,4 +13,6 @@ type UserRepository interface {
 	Create(ctx context.Context, user *domain.User) error
 	Update(ctx context.Context, user *domain.User) error
 	Delete(ctx context.Context, id uuid.UUID) error
+	List(ctx context.Context, keyword string, limit, offset int32) ([]*domain.User, error)
+	Count(ctx context.Context, keyword string) (int64, error)
 }

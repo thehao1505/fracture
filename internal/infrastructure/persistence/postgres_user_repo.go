@@ -79,3 +79,23 @@ func (r *postgresUserRepo) Update(ctx context.Context, user *domain.User) error 
 func (r *postgresUserRepo) Delete(ctx context.Context, id uuid.UUID) error {
 	return r.q.DeleteUser(ctx, id)
 }
+
+func (r *postgresUserRepo) List(ctx context.Context, keyword string, limit, offset int32) ([]*domain.User, error) {
+	rows, err := r.q.ListUsers(ctx, sqlcgen.ListUsersParams{
+		Keyword:    keyword,
+		PageLimit:  limit,
+		PageOffset: offset,
+	})
+	if err != nil {
+		return nil, err
+	}
+	users := make([]*domain.User, 0, len(rows))
+	for _, u := range rows {
+		users = append(users, userToDomain(u))
+	}
+	return users, nil
+}
+
+func (r *postgresUserRepo) Count(ctx context.Context, keyword string) (int64, error) {
+	return r.q.CountUsers(ctx, keyword)
+}

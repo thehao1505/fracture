@@ -12,6 +12,22 @@ import (
 	"github.com/google/uuid"
 )
 
+const countUsers = `-- name: CountUsers :one
+SELECT COUNT(*)
+FROM users
+WHERE
+    $1::text = ''
+    OR name  ILIKE '%' || $1 || '%'
+    OR email ILIKE '%' || $1 || '%'
+`
+
+func (q *Queries) CountUsers(ctx context.Context, keyword string) (int64, error) {
+	row := q.db.QueryRow(ctx, countUsers, keyword)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const createUser = `-- name: CreateUser :exec
 INSERT INTO users (id, email, password, name, created_at, updated_at)
 VALUES ($1, $2, $3, $4, $5, $6)
@@ -86,6 +102,50 @@ func (q *Queries) GetUserByID(ctx context.Context, id uuid.UUID) (User, error) {
 		&i.UpdatedAt,
 	)
 	return i, err
+}
+
+const listUsers = `-- name: ListUsers :many
+SELECT id, email, password, name, created_at, updated_at
+FROM users
+WHERE
+    $1::text = ''
+    OR name  ILIKE '%' || $1 || '%'
+    OR email ILIKE '%' || $1 || '%'
+ORDER BY created_at DESC
+LIMIT $3 OFFSET $2
+`
+
+type ListUsersParams struct {
+	Keyword    string `json:"keyword"`
+	PageOffset int32  `json:"page_offset"`
+	PageLimit  int32  `json:"page_limit"`
+}
+
+func (q *Queries) ListUsers(ctx context.Context, arg ListUsersParams) ([]User, error) {
+	rows, err := q.db.Query(ctx, listUsers, arg.Keyword, arg.PageOffset, arg.PageLimit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []User
+	for rows.Next() {
+		var i User
+		if err := rows.Scan(
+			&i.ID,
+			&i.Email,
+			&i.Password,
+			&i.Name,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const updateUser = `-- name: UpdateUser :exec

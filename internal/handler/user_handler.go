@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/lukenguyen/fracture/internal/domain"
@@ -176,4 +177,43 @@ func (h *UserHandler) DeleteUser(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "user deleted successfully"})
+}
+
+// ListUsers godoc
+// @Summary List users
+// @Description List users with pagination and optional keyword search on name/email
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param page query int false "Page number (default 1)"
+// @Param limit query int false "Items per page (default 20, max 100)"
+// @Param keyword query string false "Search keyword (matches name or email)"
+// @Success 200 {object} map[string]interface{} "Users retrieved successfully"
+// @Failure 401 {object} map[string]string "Unauthorized"
+// @Failure 500 {object} map[string]string "Internal server error"
+// @Security BearerAuth
+// @Router /users [get]
+func (h *UserHandler) ListUsers(c *gin.Context) {
+	page, _ := strconv.Atoi(c.Query("page"))   // "" -> 0, usecase tự set default
+	limit, _ := strconv.Atoi(c.Query("limit"))
+	keyword := c.Query("keyword")
+
+	users, total, err := h.userUc.ListUsers(c.Request.Context(), usecase.ListUsersParams{
+		Page:    page,
+		Limit:   limit,
+		Keyword: keyword,
+	})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"data": users,
+		"pagination": gin.H{
+			"page":  page,
+			"limit": limit,
+			"total": total,
+		},
+	})
 }
