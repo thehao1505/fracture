@@ -24,9 +24,10 @@ type createBlockRequest struct {
 }
 
 type updateBlockRequest struct {
-	Type     string          `json:"type" binding:"required"`
-	Content  json.RawMessage `json:"content" binding:"required"`
-	IsActive bool            `json:"is_active"`
+	Type    string          `json:"type" binding:"required"`
+	Content json.RawMessage `json:"content" binding:"required"`
+	// IsActive là con trỏ để phân biệt "không gửi" (giữ nguyên) với false (ẩn).
+	IsActive *bool `json:"is_active"`
 }
 
 type reorderRequest struct {
@@ -111,13 +112,12 @@ func (h *BlockHandler) Update(c *gin.Context) {
 	}
 
 	b := domain.Block{
-		ID:       blockID,
-		Type:     domain.BlockType(req.Type),
-		Content:  req.Content,
-		IsActive: req.IsActive,
+		ID:      blockID,
+		Type:    domain.BlockType(req.Type),
+		Content: req.Content,
 	}
 
-	if err := h.profileUc.UpdateBlock(c.Request.Context(), currentUserID(c), &b); err != nil {
+	if err := h.profileUc.UpdateBlock(c.Request.Context(), currentUserID(c), &b, req.IsActive); err != nil {
 		respondDomainError(c, err)
 		return
 	}

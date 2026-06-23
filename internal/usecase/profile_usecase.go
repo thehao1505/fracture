@@ -352,7 +352,8 @@ func (uc *ProfileUseCase) CreateBlock(ctx context.Context, userID uuid.UUID, b *
 }
 
 // UpdateBlock sửa type/content/is_active của một block thuộc profile chủ sở hữu.
-func (uc *ProfileUseCase) UpdateBlock(ctx context.Context, userID uuid.UUID, b *domain.Block) error {
+// isActive là con trỏ: nil → giữ nguyên trạng thái hiện tại; ngược lại đặt theo giá trị.
+func (uc *ProfileUseCase) UpdateBlock(ctx context.Context, userID uuid.UUID, b *domain.Block, isActive *bool) error {
 	if !b.Type.IsValid() {
 		return domain.ErrBadRequest
 	}
@@ -365,10 +366,37 @@ func (uc *ProfileUseCase) UpdateBlock(ctx context.Context, userID uuid.UUID, b *
 		return err
 	}
 
+	// Xác minh block thuộc profile của user: chống IDOR và trả 404 nếu không có.
+	existing, err := uc.findBlock(ctx, p.ID, b.ID)
+	if err != nil {
+		return err
+	}
+
+	// is_active chỉ đổi khi client gửi rõ; không gửi thì giữ nguyên.
+	if isActive != nil {
+		b.IsActive = *isActive
+	} else {
+		b.IsActive = existing.IsActive
+	}
+
 	// Không tin profile_id từ client — gắn theo profile của chính user (chống IDOR).
 	b.ProfileID = p.ID
 	b.UpdatedAt = time.Now().UTC()
 	return uc.blockRepo.Update(ctx, b)
+}
+
+// findBlock tìm một block theo id trong phạm vi profile. ErrNotFound nếu không thuộc.
+func (uc *ProfileUseCase) findBlock(ctx context.Context, profileID, blockID uuid.UUID) (*domain.Block, error) {
+	blocks, err := uc.blockRepo.ListByProfile(ctx, profileID)
+	if err != nil {
+		return nil, err
+	}
+	for i := range blocks {
+		if blocks[i].ID == blockID {
+			return &blocks[i], nil
+		}
+	}
+	return nil, domain.ErrNotFound
 }
 
 // DeleteBlock xóa block thuộc profile chủ sở hữu.
