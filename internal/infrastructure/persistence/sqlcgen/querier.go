@@ -12,11 +12,23 @@ import (
 
 type Querier interface {
 	CountUsers(ctx context.Context, keyword string) (int64, error)
+	CreateBlock(ctx context.Context, arg CreateBlockParams) error
+	CreateProfile(ctx context.Context, arg CreateProfileParams) error
 	CreateUser(ctx context.Context, arg CreateUserParams) error
+	DeleteBlock(ctx context.Context, arg DeleteBlockParams) error
 	DeleteUser(ctx context.Context, id uuid.UUID) error
+	GetProfileByUserID(ctx context.Context, userID uuid.UUID) (Profile, error)
+	GetPublishedProfileByUsername(ctx context.Context, username string) (Profile, error)
 	GetUserByEmail(ctx context.Context, email string) (User, error)
 	GetUserByID(ctx context.Context, id uuid.UUID) (User, error)
+	IncrementBlockClick(ctx context.Context, id uuid.UUID) error
+	ListActiveBlocksByProfile(ctx context.Context, profileID uuid.UUID) ([]Block, error)
+	ListBlocksByProfile(ctx context.Context, profileID uuid.UUID) ([]Block, error)
 	ListUsers(ctx context.Context, arg ListUsersParams) ([]User, error)
+	ProfileUsernameExists(ctx context.Context, arg ProfileUsernameExistsParams) (bool, error)
+	UpdateBlock(ctx context.Context, arg UpdateBlockParams) error
+	UpdateBlockPosition(ctx context.Context, arg UpdateBlockPositionParams) error
+	UpdateProfile(ctx context.Context, arg UpdateProfileParams) error
 	UpdateUser(ctx context.Context, arg UpdateUserParams) error
 }
 

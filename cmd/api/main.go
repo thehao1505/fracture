@@ -59,6 +59,12 @@ func main() {
 	authUC := usecase.NewAuthUseCase(userRepo, tokenManager)
 	authH := handler.NewAuthHandler(authUC)
 
+	profileRepo := persistence.NewPostgresProfileRepo(pool)
+	blockRepo := persistence.NewPostgresBlockRepo(pool)
+	profileUC := usecase.NewProfileUseCase(profileRepo, blockRepo)
+	profileH := handler.NewProfileHandler(profileUC)
+	blockH := handler.NewBlockHandler(profileUC)
+
 	if cfg.App.Env == "production" {
 		gin.SetMode(gin.ReleaseMode)
 	}
@@ -85,6 +91,25 @@ func main() {
 			users.PUT("/:id", userH.UpdateUser)
 			users.DELETE("/:id", userH.DeleteUser)
 			users.GET("", userH.ListUsers)
+		}
+
+		public := v1.Group("/p")
+		{
+			public.GET("/:username", profileH.GetPublic)
+			public.POST("/:username/blocks/:id/click", profileH.RecordClick)
+		}
+
+		me := v1.Group("/me")
+		me.Use(middleware.AuthRequired(tokenManager))
+		{
+			me.GET("/profile", profileH.GetMine)
+			me.POST("/profile", profileH.Create)
+			me.PUT("/profile", profileH.Update)
+			me.GET("/blocks", blockH.List)
+			me.POST("/blocks", blockH.Create)
+			me.PATCH("/blocks/reorder", blockH.Reorder)
+			me.PUT("/blocks/:id", blockH.Update)
+			me.DELETE("/blocks/:id", blockH.Delete)
 		}
 	}
 

@@ -10,6 +10,31 @@ import (
 	"github.com/google/uuid"
 )
 
+type Block struct {
+	ID         uuid.UUID `json:"id"`
+	ProfileID  uuid.UUID `json:"profile_id"`
+	Type       string    `json:"type"`
+	Content    []byte    `json:"content"`
+	Position   int32     `json:"position"`
+	IsActive   bool      `json:"is_active"`
+	ClickCount int64     `json:"click_count"`
+	CreatedAt  time.Time `json:"created_at"`
+	UpdatedAt  time.Time `json:"updated_at"`
+}
+
+type Profile struct {
+	ID          uuid.UUID `json:"id"`
+	UserID      uuid.UUID `json:"user_id"`
+	Username    string    `json:"username"`
+	DisplayName string    `json:"display_name"`
+	Bio         string    `json:"bio"`
+	AvatarUrl   string    `json:"avatar_url"`
+	Appearance  []byte    `json:"appearance"`
+	IsPublished bool      `json:"is_published"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
+}
+
 type User struct {
 	ID        uuid.UUID `json:"id"`
 	Email     string    `json:"email"`
