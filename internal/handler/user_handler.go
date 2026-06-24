@@ -27,6 +27,15 @@ func NewUserHandler(uc *usecase.UserUseCase) *UserHandler {
 	return &UserHandler{userUc: uc}
 }
 
+// RegisterRoutes gắn các route user vào group đã cho (group này cần AuthRequired).
+func (h *UserHandler) RegisterRoutes(rg *gin.RouterGroup) {
+	rg.GET("/:id", h.GetUser)
+	rg.POST("", h.CreateUser)
+	rg.PUT("/:id", h.UpdateUser)
+	rg.DELETE("/:id", h.DeleteUser)
+	rg.GET("", h.ListUsers)
+}
+
 // GetUser godoc
 // @Summary Get a user by ID
 // @Description Retrieve a user from the database by providing their UUID
@@ -194,7 +203,7 @@ func (h *UserHandler) DeleteUser(c *gin.Context) {
 // @Security BearerAuth
 // @Router /users [get]
 func (h *UserHandler) ListUsers(c *gin.Context) {
-	page, _ := strconv.Atoi(c.Query("page"))   // "" -> 0, usecase tự set default
+	page, _ := strconv.Atoi(c.Query("page")) // "" -> 0, usecase tự set default
 	limit, _ := strconv.Atoi(c.Query("limit"))
 	keyword := c.Query("keyword")
 

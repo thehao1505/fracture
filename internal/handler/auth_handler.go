@@ -29,6 +29,12 @@ func NewAuthHandler(uc *usecase.AuthUseCase) *AuthHandler {
 	return &AuthHandler{authUc: uc}
 }
 
+// RegisterRoutes gắn các route auth (public) vào group đã cho.
+func (h *AuthHandler) RegisterRoutes(rg *gin.RouterGroup) {
+	rg.POST("/register", h.Register)
+	rg.POST("/login", h.Login)
+}
+
 // Register godoc
 // @Summary Register a new account
 // @Description Create a new user account. The password is hashed before storage.

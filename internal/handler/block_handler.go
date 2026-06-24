@@ -18,6 +18,17 @@ func NewBlockHandler(uc *usecase.ProfileUseCase) *BlockHandler {
 	return &BlockHandler{profileUc: uc}
 }
 
+// RegisterMe gắn các route block của chủ sở hữu vào group "/me" (cần AuthRequired).
+func (h *BlockHandler) RegisterMe(rg *gin.RouterGroup) {
+	rg.GET("/blocks", h.List)
+	rg.POST("/blocks", h.Create)
+	// "reorder" (static) phải đăng ký TRƯỚC "/blocks/:id" (param) để gin không
+	// coi "reorder" là một :id — giữ hai dòng này cạnh nhau.
+	rg.PATCH("/blocks/reorder", h.Reorder)
+	rg.PUT("/blocks/:id", h.Update)
+	rg.DELETE("/blocks/:id", h.Delete)
+}
+
 type createBlockRequest struct {
 	Type    string          `json:"type" binding:"required"`
 	Content json.RawMessage `json:"content" binding:"required"`

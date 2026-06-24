@@ -1,5 +1,9 @@
 basePath: /api/v1
 definitions:
+  handler.createBlockRequest:
+    type: object
+  handler.createProfileRequest:
+    type: object
   handler.createUserRequest:
     properties:
       email:
@@ -34,6 +38,19 @@ definitions:
     - email
     - name
     - password
+    type: object
+  handler.reorderRequest:
+    properties:
+      order:
+        items:
+          type: string
+        type: array
+    required:
+    - order
+    type: object
+  handler.updateBlockRequest:
+    type: object
+  handler.updateProfileRequest:
     type: object
   handler.updateUserRequest:
     properties:
@@ -138,6 +155,364 @@ paths:
       summary: Register a new account
       tags:
       - auth
+  /me/blocks:
+    get:
+      description: Returns all blocks (including hidden ones) for the authenticated
+        user's profile.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Blocks
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Profile not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List my blocks
+      tags:
+      - blocks
+    post:
+      consumes:
+      - application/json
+      description: Adds a block to the authenticated user's profile.
+      parameters:
+      - description: Create block payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.createBlockRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Block created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid request body or content
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Profile not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create a block
+      tags:
+      - blocks
+  /me/blocks/{id}:
+    delete:
+      description: Deletes a block owned by the authenticated user.
+      parameters:
+      - description: Block ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Block deleted
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid block ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Profile not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete a block
+      tags:
+      - blocks
+    put:
+      consumes:
+      - application/json
+      description: Updates type/content/visibility of a block owned by the authenticated
+        user.
+      parameters:
+      - description: Block ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Update block payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.updateBlockRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Block updated
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid block ID, request body or content
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Profile not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update a block
+      tags:
+      - blocks
+  /me/blocks/reorder:
+    patch:
+      consumes:
+      - application/json
+      description: Sets the position of every block from the given ordered list of
+        block IDs.
+      parameters:
+      - description: Ordered block IDs
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.reorderRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Blocks reordered
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid block ID or order does not match existing blocks
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Profile not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Reorder blocks
+      tags:
+      - blocks
+  /me/profile:
+    get:
+      description: Returns the authenticated user's full profile (including drafts
+        and all blocks).
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Profile
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Profile not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get my profile
+      tags:
+      - profiles
+    post:
+      consumes:
+      - application/json
+      description: Creates the profile for the authenticated user (one profile per
+        user).
+      parameters:
+      - description: Create profile payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.createProfileRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Profile created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid request body
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "409":
+          description: Profile or username already exists
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create my profile
+      tags:
+      - profiles
+    put:
+      consumes:
+      - application/json
+      description: Updates username/bio/avatar/appearance/publish state for the authenticated
+        user.
+      parameters:
+      - description: Update profile payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.updateProfileRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Profile updated
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid request body
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Profile not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "409":
+          description: Username already exists
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update my profile
+      tags:
+      - profiles
+  /p/{username}:
+    get:
+      description: Public link-in-bio page. Returns the profile and its active blocks
+        only when published.
+      parameters:
+      - description: Profile username
+        in: path
+        name: username
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Public profile
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Profile not found or not published
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get a public profile by username
+      tags:
+      - profiles
+  /p/{username}/blocks/{id}/click:
+    post:
+      description: Increments the block click count and returns the destination URL
+        for the client to redirect to.
+      parameters:
+      - description: Profile username
+        in: path
+        name: username
+        required: true
+        type: string
+      - description: Block ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Destination URL
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid block ID or non-clickable block
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Profile or block not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Record a click on a public block
+      tags:
+      - profiles
   /users:
     get:
       consumes:

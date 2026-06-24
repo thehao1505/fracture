@@ -19,6 +19,19 @@ func NewProfileHandler(uc *usecase.ProfileUseCase) *ProfileHandler {
 	return &ProfileHandler{profileUc: uc}
 }
 
+// RegisterPublic gắn các route public (không cần token) vào group "/p".
+func (h *ProfileHandler) RegisterPublic(rg *gin.RouterGroup) {
+	rg.GET("/:username", h.GetPublic)
+	rg.POST("/:username/blocks/:id/click", h.RecordClick)
+}
+
+// RegisterMe gắn các route profile của chủ sở hữu vào group "/me" (cần AuthRequired).
+func (h *ProfileHandler) RegisterMe(rg *gin.RouterGroup) {
+	rg.GET("/profile", h.GetMine)
+	rg.POST("/profile", h.Create)
+	rg.PUT("/profile", h.Update)
+}
+
 type createProfileRequest struct {
 	Username    string          `json:"username" binding:"required"`
 	DisplayName string          `json:"display_name"`

@@ -77,40 +77,19 @@ func main() {
 
 	v1 := r.Group("/api/v1")
 	{
-		auth := v1.Group("/auth")
-		{
-			auth.POST("/register", authH.Register)
-			auth.POST("/login", authH.Login)
-		}
+		// Public.
+		authH.RegisterRoutes(v1.Group("/auth"))
+		profileH.RegisterPublic(v1.Group("/profile"))
 
+		// Cần xác thực.
 		users := v1.Group("/users")
 		users.Use(middleware.AuthRequired(tokenManager))
-		{
-			users.GET("/:id", userH.GetUser)
-			users.POST("", userH.CreateUser)
-			users.PUT("/:id", userH.UpdateUser)
-			users.DELETE("/:id", userH.DeleteUser)
-			users.GET("", userH.ListUsers)
-		}
-
-		public := v1.Group("/p")
-		{
-			public.GET("/:username", profileH.GetPublic)
-			public.POST("/:username/blocks/:id/click", profileH.RecordClick)
-		}
+		userH.RegisterRoutes(users)
 
 		me := v1.Group("/me")
 		me.Use(middleware.AuthRequired(tokenManager))
-		{
-			me.GET("/profile", profileH.GetMine)
-			me.POST("/profile", profileH.Create)
-			me.PUT("/profile", profileH.Update)
-			me.GET("/blocks", blockH.List)
-			me.POST("/blocks", blockH.Create)
-			me.PATCH("/blocks/reorder", blockH.Reorder)
-			me.PUT("/blocks/:id", blockH.Update)
-			me.DELETE("/blocks/:id", blockH.Delete)
-		}
+		profileH.RegisterMe(me)
+		blockH.RegisterMe(me)
 	}
 
 	srv := &http.Server{
